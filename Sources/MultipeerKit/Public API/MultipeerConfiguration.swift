@@ -74,6 +74,9 @@ public struct MultipeerConfiguration {
     /// remains stable between different sessions. If you use MultipeerKit in app extensions,
     /// make sure to use a shared app group if you wish to maintain a stable identity.
     public var defaults: UserDefaults
+    
+    /// Flag to indicate whether to store this peer's identity in defaults
+    public var storeIdentity: Bool
 
     /// The security configuration.
     public var security: Security
@@ -90,6 +93,7 @@ public struct MultipeerConfiguration {
     ///   - defaults: An instance of `UserDefaults` that's used to store this peer's identity so that it
     ///   remains stable between different sessions. If you use MultipeerKit in app extension
     ///   make sure to use a shared app group if you wish to maintain a stable identity.
+    ///   - storeIdentity: Flag to store this peer's identity in defaults.
     ///   - security: The security configuration.
     ///   - invitation: Defines how the multipeer connection handles newly discovered peers.
     ///   New peers can be invited automatically, invited with a custom context
@@ -97,6 +101,7 @@ public struct MultipeerConfiguration {
     public init(serviceType: String,
                 peerName: String,
                 defaults: UserDefaults,
+                storeIdentity: Bool = false,
                 security: Security,
                 invitation: Invitation)
     {
@@ -105,6 +110,7 @@ public struct MultipeerConfiguration {
         self.serviceType = serviceType
         self.peerName = peerName
         self.defaults = defaults
+        self.storeIdentity = storeIdentity
         self.security = security
         self.invitation = invitation
     }

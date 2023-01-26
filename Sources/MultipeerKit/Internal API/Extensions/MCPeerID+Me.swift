@@ -21,7 +21,12 @@ extension MCPeerID {
     }
 
     static func fetchOrCreate(with config: MultipeerConfiguration) -> MCPeerID {
-        fetchExisting(with: config) ?? MCPeerID(displayName: config.peerName)
+        let peerID = fetchExisting(with: config) ?? MCPeerID(displayName: config.peerName)
+        if config.storeIdentity,
+            let peerIDdata = try? NSKeyedArchiver.archivedData(withRootObject: peerID, requiringSecureCoding: true) {
+            config.defaults.set(peerIDdata, forKey: Self.defaultsKey)
+        }
+        return peerID
     }
 
 }
