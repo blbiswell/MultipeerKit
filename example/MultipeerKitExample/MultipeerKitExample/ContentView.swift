@@ -34,7 +34,9 @@ struct ContentView: View {
             Form {
                 TextField("Message", text: $viewModel.message)
 
-                Button(action: { self.sendToSelectedPeers(self.viewModel.message) }) {
+                Button {
+                    self.sendToSelectedPeers(self.viewModel.message)
+                } label: {
                     Text("SEND")
                 }
             }
