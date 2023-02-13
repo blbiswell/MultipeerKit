@@ -125,7 +125,7 @@ public final class MultipeerTransceiver {
     /// - Parameters:
     ///   - payload: The payload to be sent.
     ///   - peers: An array of peers to send the message to.
-    public func send<T: Encodable>(_ payload: T, to peers: [Peer]) {
+    public func send<T: Encodable>(_ payload: T, to peers: [Peer], errorHandler: ((T, Error)->Void)? = nil) {
         MultipeerMessage.register(T.self, for: String(describing: T.self))
         
         do {
@@ -135,6 +135,7 @@ public final class MultipeerTransceiver {
 
             try connection.send(data, to: peers)
         } catch {
+            errorHandler?(payload, error)
             os_log("Failed to send payload %@: %{public}@", log: self.log, type: .error, String(describing: payload), String(describing: error))
         }
     }
