@@ -24,10 +24,10 @@ public struct MultipeerConfiguration {
 
         /// An array of information that can be used to identify the peer to other nearby peers.
         ///
-        /// The first object in this array should be a `SecIdentity` object that provides the local peer’s identity.
+        /// The first object in this array should be a `SecIdentity` object that provides the local peer's identity.
         ///
         /// The remainder of the array should contain zero or more additional SecCertificate objects that provide any
-        /// intermediate certificates that nearby peers might require when verifying the local peer’s identity.
+        /// intermediate certificates that nearby peers might require when verifying the local peer's identity.
         /// These certificates should be sent in certificate chain order.
         ///
         /// Check Apple's `MCSession` docs for more information.
