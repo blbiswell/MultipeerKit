@@ -26,13 +26,13 @@
 
 import Foundation
 
-struct MultipeerMessage: Codable {
+public struct MultipeerMessage: Codable {
     static let senderUserInfoKey = CodingUserInfoKey(rawValue: "sender")!
     
     let type: String
     let payload: Any?
 
-    init(type: String, payload: Any) {
+    public init(type: String, payload: Any) {
         self.type = type
         self.payload = payload
     }
@@ -66,7 +66,7 @@ struct MultipeerMessage: Codable {
         }
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         type = try container.decode(String.self, forKey: .type)
         
@@ -79,7 +79,7 @@ struct MultipeerMessage: Codable {
         }
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(type, forKey: .type)

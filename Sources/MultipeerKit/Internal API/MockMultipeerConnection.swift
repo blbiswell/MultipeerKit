@@ -9,6 +9,8 @@ final class MockMultipeerConnection: MultipeerProtocol {
     }()
 
     var didReceiveData: ((Data, Peer) -> Void)?
+    var didStartReceivingResource: ((String, Peer, Progress) -> Void)?
+    var didFinishReceivingResource: ((String, Peer, URL?, Error?) -> Void)?
     var didFindPeer: ((Peer) -> Void)?
     var didLosePeer: ((Peer) -> Void)?
     var didConnectToPeer: ((Peer) -> Void)?
@@ -32,6 +34,10 @@ final class MockMultipeerConnection: MultipeerProtocol {
         
     }
 
+    func sendResource(at resourceURL: URL, withName resourceName: String, to peer: Peer, withCompletionHandler completionHandler: ((Error?) -> Void)?) -> Progress? {
+        return nil
+    }
+    
     func invite(_ peer: Peer, with context: Data?, timeout: TimeInterval, completion: InvitationCompletionHandler?) {
         
     }

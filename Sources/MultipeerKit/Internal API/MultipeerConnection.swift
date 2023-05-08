@@ -30,6 +30,8 @@ final class MultipeerConnection: NSObject, MultipeerProtocol {
     }
 
     var didReceiveData: ((Data, Peer) -> Void)?
+    var didStartReceivingResource: ((String, Peer, Progress) -> Void)?
+    var didFinishReceivingResource: ((String, Peer, URL?, Error?) -> Void)?
     var didFindPeer: ((Peer) -> Void)?
     var didLosePeer: ((Peer) -> Void)?
     var didConnectToPeer: ((Peer) -> Void)?
@@ -108,6 +110,11 @@ final class MultipeerConnection: NSObject, MultipeerProtocol {
         let ids = peers.map { $0.underlyingPeer }
         try session.send(data, toPeers: ids, with: .reliable)
     }
+    
+    func sendResource(at resourceURL: URL, withName resourceName: String, to peer: Peer, withCompletionHandler completionHandler: ((Error?) -> Void)? = nil) -> Progress? {
+        let id = peer.underlyingPeer
+        return session.sendResource(at: resourceURL, withName: resourceName, toPeer: id, withCompletionHandler: completionHandler)
+    }
 
     private var invitationCompletionHandlers: [MCPeerID: InvitationCompletionHandler] = [:]
 
@@ -168,10 +175,23 @@ extension MultipeerConnection: MCSessionDelegate {
 
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
         os_log("%{public}@", log: log, type: .debug, #function)
+        
+        if let peer = try? Peer(peer: peerID, discoveryInfo: nil) {
+            didStartReceivingResource?(resourceName, peer, progress)
+        } else {
+            os_log("Started to receive resource, but cannot create peer for %s", log: log, type: .error, #function, peerID.displayName)
+            progress.cancel()
+        }
     }
 
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
         os_log("%{public}@", log: log, type: .debug, #function)
+        
+        if let peer = try? Peer(peer: peerID, discoveryInfo: nil) {
+            didFinishReceivingResource?(resourceName, peer, localURL, error)
+        } else {
+            os_log("Finished receiving resource, but cannot create peer for %s", log: log, type: .error, #function, peerID.displayName)
+        }
     }
 
 }

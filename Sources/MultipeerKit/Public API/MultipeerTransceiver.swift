@@ -24,6 +24,9 @@ public final class MultipeerTransceiver {
     /// Called on the main queue when the connection with a peer is interrupted.
     public var peerDisconnected: (Peer) -> Void = { _ in }
     
+    /// Called on the main queue when starting to receive a resource from a peer
+    public var didStartReceivingResource: (String, Peer, Progress) -> Void = { _, _, _ in }
+    
     /// The current device's peer id
     public var localPeer: Peer? {
         return connection.getLocalPeer()
@@ -65,6 +68,12 @@ public final class MultipeerTransceiver {
     private func configure(_ connection: MultipeerProtocol) {
         connection.didReceiveData = { [weak self] data, peer in
             self?.handleDataReceived(data, from: peer)
+        }
+        connection.didStartReceivingResource = { [weak self] resourceName, peer, progress in
+            DispatchQueue.main.async { self?.didStartReceivingResource(resourceName, peer, progress) }
+        }
+        connection.didFinishReceivingResource = { [weak self] (resourceName, peer, localURL, error) in
+            self?.handleResourceReceived(resourceName, from: peer, at: localURL, witheError: error)
         }
         connection.didFindPeer = { [weak self] peer in
             DispatchQueue.main.async { self?.handlePeerAdded(peer) }
@@ -152,6 +161,28 @@ public final class MultipeerTransceiver {
         } catch {
             os_log("Failed to decode message: %{public}@", log: self.log, type: .error, String(describing: error))
         }
+    }
+    
+    private func handleResourceReceived(_ resourceName: String, from peer: Peer, at localURL: URL?, witheError error: Error?) {
+        guard
+            let localURL = localURL,
+            let data = try? Data(contentsOf: localURL)
+        else {
+            if let error = error {
+                os_log("Failed to recieve resource: %{public}@", log: self.log, type: .error, String(describing: error))
+            }
+            return
+        }
+        
+        handleDataReceived(data, from: peer)
+        try? FileManager.default.removeItem(at: localURL)
+    }
+    
+    /// Sends a resource to a specified peer
+    /// - Parameters:
+    ///
+    public func sendResource(at resourceURL: URL, withName resourceName: String, to peer: Peer, withCompletionHandler completionHandler:  ((Error?) -> Void)? = nil) -> Progress? {
+        return connection.sendResource(at: resourceURL, withName: resourceName, to: peer, withCompletionHandler: completionHandler)
     }
 
     /// Manually invite a peer for communicating.
